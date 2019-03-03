@@ -28,6 +28,9 @@ void ESM::DialogueState::load (ESMReader &esm)
             esm.skipHSub();
         }
     }
+
+    while (esm.isNextSub ("SERE"))
+        mSeenResponses.insert (esm.getHString());
 }
 
 void ESM::DialogueState::save (ESMWriter &esm) const
@@ -49,5 +52,11 @@ void ESM::DialogueState::save (ESMWriter &esm) const
             esm.writeHNString ("REA2", reactIter->first);
             esm.writeHNT ("INTV", reactIter->second);
         }
+    }
+
+    for (std::unordered_set<std::string>::const_iterator iter (mSeenResponses.begin());
+        iter!=mSeenResponses.end(); ++iter)
+    {
+        esm.writeHNString ("SERE", *iter);
     }
 }

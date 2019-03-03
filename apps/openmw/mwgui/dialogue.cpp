@@ -124,8 +124,8 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
-    Response::Response(const std::string &text, const std::string &title, bool needMargin)
-        : mTitle(title), mNeedMargin(needMargin)
+    Response::Response(const std::string &text, const std::string &title, bool needMargin, Response::Seen seen)
+        : mTitle(title), mNeedMargin(needMargin), mSeen(seen)
     {
         mText = text;
     }
@@ -140,6 +140,27 @@ namespace MWGui
             BookTypesetter::Style* title = typesetter->createStyle("", headerColour, false);
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
             typesetter->sectionBreak();
+        }
+
+        switch (mSeen)
+        {
+            case Response::Seen_New:
+            {
+                BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour::Red, false);
+                typesetter->write(title, to_utf8_span("[NEW!]"));
+                typesetter->sectionBreak();
+                break;
+            }
+            case Response::Seen_Seen:
+            {
+                MyGUI::Colour colour = MyGUI::Colour(0.25, 0.25, 0.25);
+                BookTypesetter::Style* title = typesetter->createStyle("", colour, false);
+                typesetter->write(title, to_utf8_span("[seen]"));
+                typesetter->sectionBreak();
+                break;
+            }
+            case Response::Seen_Unknown:
+                break;
         }
 
         typedef std::pair<size_t, size_t> Range;
@@ -667,7 +688,9 @@ namespace MWGui
 
     void DialogueWindow::addResponse(const std::string &title, const std::string &text, bool needMargin)
     {
-        mHistoryContents.push_back(new Response(text, title, needMargin));
+        bool isNew = MWBase::Environment::get().getDialogueManager()->isNewResponse(text);
+        Response::Seen seen = isNew ? Response::Seen_New : Response::Seen_Seen;
+        mHistoryContents.push_back(new Response(text, title, needMargin, seen));
         updateHistory();
         updateTopics();
     }

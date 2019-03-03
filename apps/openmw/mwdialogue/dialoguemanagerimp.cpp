@@ -542,6 +542,17 @@ namespace MWDialogue
         return false;
     }
 
+    bool DialogueManager::isNewResponse(const std::string& text)
+    {
+        std::unordered_set<std::string>::const_iterator iter = mSeenResponses.find(text);
+        if (iter == mSeenResponses.end())
+        {
+            mSeenResponses.insert(text);
+            return true;
+        }
+        return false;
+    }
+
     void DialogueManager::say(const MWWorld::Ptr &actor, const std::string &topic)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -596,6 +607,7 @@ namespace MWDialogue
             state.mKnownTopics.push_back (*iter);
         }
 
+        state.mSeenResponses = mSeenResponses;
         state.mChangedFactionReaction = mChangedFactionReaction;
 
         writer.startRecord (ESM::REC_DIAS);
@@ -617,6 +629,7 @@ namespace MWDialogue
                 if (store.get<ESM::Dialogue>().search (*iter))
                     mKnownTopics.insert (*iter);
 
+            mSeenResponses = state.mSeenResponses;
             mChangedFactionReaction = state.mChangedFactionReaction;
         }
     }

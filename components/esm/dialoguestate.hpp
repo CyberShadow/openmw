@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_set>
 
 namespace ESM
 {
@@ -16,6 +17,8 @@ namespace ESM
     {
         // must be lower case topic IDs
         std::vector<std::string> mKnownTopics;
+
+        std::unordered_set<std::string> mSeenResponses;
 
         // must be lower case faction IDs
         std::map<std::string, std::map<std::string, int> > mChangedFactionReaction;

@@ -5,6 +5,7 @@
 
 #include <map>
 #include <set>
+#include <unordered_set>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
@@ -24,6 +25,7 @@ namespace MWDialogue
     class DialogueManager : public MWBase::DialogueManager
     {
             std::set<std::string, Misc::StringUtils::CiComp> mKnownTopics;// Those are the topics the player knows.
+            std::unordered_set<std::string> mSeenResponses;
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
@@ -83,6 +85,8 @@ namespace MWDialogue
             virtual void goodbye();
 
             virtual bool checkServiceRefused (ResponseCallback* callback);
+
+            virtual bool isNewResponse (const std::string& text);
 
             virtual void say(const MWWorld::Ptr &actor, const std::string &topic);
 

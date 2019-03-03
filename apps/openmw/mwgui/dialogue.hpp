@@ -92,11 +92,13 @@ namespace MWGui
 
     struct Response : DialogueText
     {
-        Response(const std::string& text, const std::string& title = "", bool needMargin = true);
+        enum Seen { Seen_Unknown, Seen_New, Seen_Seen };
+        Response(const std::string& text, const std::string& title = "", bool needMargin = true, Seen seen = Seen_Unknown);
         virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const;
         void addTopicLink (BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
         std::string mTitle;
         bool mNeedMargin;
+        Seen mSeen;
     };
 
     struct Message : DialogueText

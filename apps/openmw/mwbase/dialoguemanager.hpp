@@ -72,6 +72,8 @@ namespace MWBase
 
             virtual bool checkServiceRefused (ResponseCallback* callback) = 0;
 
+            virtual bool isNewResponse (const std::string& text) = 0;
+
             virtual void persuade (int type, ResponseCallback* callback) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
 
