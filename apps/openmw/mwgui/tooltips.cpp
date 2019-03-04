@@ -124,7 +124,7 @@ namespace MWGui
                     tooltipSize = createToolTip(info, checkOwned());
                 }
                 else
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true, checkStolen());
 
                 MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
                 position(tooltipPosition, tooltipSize, viewSize);
@@ -202,7 +202,7 @@ namespace MWGui
                     std::pair<ItemModel::ModelIndex, ItemModel*> pair = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
                     bool isAllowedToUse = pair.second->allowedToUseItems();
-                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, !isAllowedToUse);
+                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, !isAllowedToUse || checkStolen());
                 }
                 else if (type == "ToolTipInfo")
                 {
@@ -216,7 +216,7 @@ namespace MWGui
 
                     mFocusObject = item;
                     if (!mFocusObject.isEmpty ())
-                        tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
+                        tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), checkStolen());
                 }
                 else if (type == "Spell")
                 {
@@ -385,6 +385,12 @@ namespace MWGui
 
         MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
         return !mm->isAllowedToUse(ptr, mFocusObject, victim);
+    }
+
+    bool ToolTips::checkStolen()
+    {
+        MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+        return mm->isItemStolen(mFocusObject.getCellRef().getRefId());
     }
 
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isOwned)

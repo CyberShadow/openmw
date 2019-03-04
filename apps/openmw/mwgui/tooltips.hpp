@@ -94,6 +94,8 @@ namespace MWGui
         
         bool checkOwned();
         /// Returns True if taking mFocusObject would be crime
+
+        bool checkStolen();
  
     private:
         MyGUI::Widget* mDynamicToolTipBox;

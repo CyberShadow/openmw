@@ -1043,6 +1043,12 @@ namespace MWMechanics
         }
     }
 
+    bool MechanicsManager::isItemStolen(const std::string &itemid)
+    {
+        StolenItemsMap::const_iterator it = mStolenItems.find(Misc::StringUtils::lowerCase(itemid));
+        return it != mStolenItems.end();
+    }
+
     bool MechanicsManager::isItemStolenFrom(const std::string &itemid, const MWWorld::Ptr& ptr)
     {
         StolenItemsMap::const_iterator it = mStolenItems.find(Misc::StringUtils::lowerCase(itemid));

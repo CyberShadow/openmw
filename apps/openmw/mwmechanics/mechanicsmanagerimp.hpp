@@ -221,6 +221,8 @@ namespace MWMechanics
             /// <Owner, item count>
             virtual std::vector<std::pair<std::string, int> > getStolenItemOwners(const std::string& itemid) override;
 
+            virtual bool isItemStolen(const std::string& itemid) override;
+
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const MWWorld::Ptr& ptr) override;
 
