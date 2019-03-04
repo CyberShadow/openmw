@@ -209,6 +209,16 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
     }
 
+    const MWWorld::ContainerStore* Container::getConstContainerStore (const MWWorld::ConstPtr& ptr)
+        const
+    {
+        const ContainerCustomData* customData = dynamic_cast<const ContainerCustomData*>
+            (ptr.getRefData().getCustomData());
+        if (!customData)
+            return nullptr;
+        return &customData->mContainerStore;
+    }
+
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
@@ -245,6 +255,10 @@ namespace MWClass
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
+
+        const MWWorld::ContainerStore* containerStore = getConstContainerStore (ptr);
+        if (containerStore && lockLevel <= 0 && containerStore->isEmpty())
+            text += "\n[empty]";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());

@@ -34,6 +34,7 @@ namespace MWClass
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
+            virtual const MWWorld::ContainerStore* getConstContainerStore (const MWWorld::ConstPtr& ptr) const;
             ///< Return container store
 
             virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;

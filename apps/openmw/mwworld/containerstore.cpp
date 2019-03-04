@@ -40,6 +40,20 @@ namespace
     }
 
     template<typename T>
+    bool isEmpty (const MWWorld::CellRefList<T>& cellRefList)
+    {
+        for (typename MWWorld::CellRefList<T>::List::const_iterator iter (
+            cellRefList.mList.begin());
+            iter!=cellRefList.mList.end();
+            ++iter)
+        {
+            if (iter->mData.getCount()>0)
+                return false;
+        }
+        return true;
+    }
+
+    template<typename T>
     MWWorld::Ptr searchId (MWWorld::CellRefList<T>& list, const std::string& id,
         MWWorld::ContainerStore *store)
     {
@@ -633,6 +647,23 @@ float MWWorld::ContainerStore::getWeight() const
     }
 
     return mCachedWeight;
+}
+
+bool MWWorld::ContainerStore::isEmpty() const
+{
+    return
+        ::isEmpty (potions)   &&
+        ::isEmpty (appas)     &&
+        ::isEmpty (armors)    &&
+        ::isEmpty (books)     &&
+        ::isEmpty (clothes)   &&
+        ::isEmpty (ingreds)   &&
+        ::isEmpty (lights)    &&
+        ::isEmpty (lockpicks) &&
+        ::isEmpty (miscItems) &&
+        ::isEmpty (probes)    &&
+        ::isEmpty (repairs)   &&
+        ::isEmpty (weapons);
 }
 
 int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
