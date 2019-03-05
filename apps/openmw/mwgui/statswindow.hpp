@@ -60,7 +60,8 @@ namespace MWGui
 
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
             std::map<int, MWMechanics::SkillValue > mSkillValues;
-            std::map<int, std::pair<MyGUI::TextBox*, MyGUI::TextBox*> > mSkillWidgetMap;
+            struct SkillWidgets { MyGUI::TextBox *name, *value, *progress; MyGUI::ProgressBar *progressBar; };
+            std::map<int, SkillWidgets> mSkillWidgetMap;
             std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
             FactionList mFactions; ///< Stores a list of factions and the current rank
             std::string mBirthSignId;

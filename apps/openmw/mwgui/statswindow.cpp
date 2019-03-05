@@ -68,7 +68,8 @@ namespace MWGui
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::make_pair(i, std::make_pair((MyGUI::TextBox*)nullptr, (MyGUI::TextBox*)nullptr)));
+            SkillWidgets widgets = {};
+            mSkillWidgetMap.insert(std::make_pair(i, widgets));
         }
 
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
@@ -220,9 +221,9 @@ namespace MWGui
     void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
         mSkillValues[parSkill] = value;
-        std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = mSkillWidgetMap[(int)parSkill];
-        MyGUI::TextBox* valueWidget = widgets.second;
-        MyGUI::TextBox* nameWidget = widgets.first;
+        SkillWidgets &widgets = mSkillWidgetMap[(int)parSkill];
+        MyGUI::TextBox* valueWidget = widgets.value;
+        MyGUI::TextBox* nameWidget = widgets.name;
         if (valueWidget && nameWidget)
         {
             int modified = value.getModified(), base = value.getBase();
@@ -455,8 +456,11 @@ namespace MWGui
             const ESM::Attribute* attr =
                 esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
-            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
+            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> textWidgets = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
                 "", "normal", coord1, coord2);
+            SkillWidgets widgets;
+            widgets.name = textWidgets.first;
+            widgets.value = textWidgets.second;
             mSkillWidgetMap[skillId] = widgets;
 
             for (int i=0; i<2; ++i)
