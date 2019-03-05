@@ -303,7 +303,7 @@ namespace MWMechanics
             const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
             for(int i = 0;i < ESM::Attribute::Length;++i)
             {
-                if(stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
+                //if(stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
                 {
                     std::stringstream attrname;
                     attrname << "AttribVal"<<(i+1);

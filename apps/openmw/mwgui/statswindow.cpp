@@ -122,10 +122,16 @@ namespace MWGui
             0
         };
 
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
         for (int i=0; ids[i]; ++i)
             if (ids[i]==id)
             {
-                setText (id, std::to_string(value.getModified()));
+                std::string text = std::to_string(value.getModified());
+                int skillIncrease = player.getClass().getNpcStats(player).getAttributeSkillIncrease(i);
+                if (skillIncrease)
+                    text = "[+" + std::to_string(skillIncrease) + "] " + text;
+                setText (id, text);
 
                 MyGUI::TextBox* box;
                 getWidget(box, id);
