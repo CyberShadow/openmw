@@ -40,10 +40,12 @@ namespace MWGui
             virtual void onOpen() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
         private:
-            void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2, MyGUI::IntCoord &coord3);
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            struct ProgressValueWidgets { MyGUI::TextBox *name, *value, *progress; MyGUI::ProgressBar *progressBar; };
+            ProgressValueWidgets addProgressValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2, MyGUI::IntCoord &coord3);
             MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
 
             void setFactions (const FactionList& factions);
@@ -60,8 +62,7 @@ namespace MWGui
 
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
             std::map<int, MWMechanics::SkillValue > mSkillValues;
-            struct SkillWidgets { MyGUI::TextBox *name, *value, *progress; MyGUI::ProgressBar *progressBar; };
-            std::map<int, SkillWidgets> mSkillWidgetMap;
+            std::map<int, ProgressValueWidgets> mSkillWidgetMap;
             std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
             FactionList mFactions; ///< Stores a list of factions and the current rank
             std::string mBirthSignId;

@@ -68,7 +68,7 @@ namespace MWGui
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            SkillWidgets widgets = {};
+            ProgressValueWidgets widgets = {};
             mSkillWidgetMap.insert(std::make_pair(i, widgets));
         }
 
@@ -220,8 +220,15 @@ namespace MWGui
 
     void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        const MWWorld::ESMStore &esmStore =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        float progressRequirement = player.getClass().getNpcStats(player).getSkillProgressRequirement(parSkill,
+            *esmStore.get<ESM::Class>().find(player.get<ESM::NPC>()->mBase->mClass));
+
         mSkillValues[parSkill] = value;
-        SkillWidgets &widgets = mSkillWidgetMap[(int)parSkill];
+        ProgressValueWidgets &widgets = mSkillWidgetMap[(int)parSkill];
         MyGUI::TextBox* valueWidget = widgets.value;
         MyGUI::TextBox* nameWidget = widgets.name;
         if (valueWidget && nameWidget)
@@ -273,6 +280,16 @@ namespace MWGui
                 valueWidget->setUserString("Visible_SkillProgressVBox", "false");
                 valueWidget->setUserString("UserData^Hidden_SkillProgressVBox", "true");
             }
+
+            char buf[32];
+            sprintf(buf, "%6.2f/%-3d",
+                value.getProgress(),
+                (int)progressRequirement
+            );
+            widgets.progress->setCaption(buf);
+            widgets.progressBar->setProgressRange(1000 * (int)progressRequirement);
+            widgets.progressBar->setProgressPosition((int)(1000 * value.getProgress()));
+
         }
     }
 
@@ -409,6 +426,36 @@ namespace MWGui
         return std::make_pair(skillNameWidget, skillValueWidget);
     }
 
+    StatsWindow::ProgressValueWidgets StatsWindow::addProgressValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2, MyGUI::IntCoord &coord3)
+    {
+        coord3.top = coord2.top + 2;
+
+        std::pair<MyGUI::TextBox*, MyGUI::TextBox*> textWidgets = addValueItem(text, value, state, coord1, coord2);
+
+        MyGUI::TextBox *skillProgressWidget;
+        MyGUI::ProgressBar *skillProgressBarWidget;
+
+        skillProgressBarWidget = mSkillView->createWidget<MyGUI::ProgressBar>("MW_Progress_Red", coord3, MyGUI::Align::Right | MyGUI::Align::Top);
+        skillProgressBarWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
+
+        coord3.top -= 1;
+        skillProgressWidget = mSkillView->createWidget<MyGUI::TextBox>("ProgressText", coord3, MyGUI::Align::Right | MyGUI::Align::Top);
+        skillProgressWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
+
+        mSkillWidgets.push_back(skillProgressWidget);
+        mSkillWidgets.push_back(skillProgressBarWidget);
+
+        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        coord3.top += lineHeight;
+
+        ProgressValueWidgets widgets;
+        widgets.name = textWidgets.first;
+        widgets.value = textWidgets.second;
+        widgets.progress = skillProgressWidget;
+        widgets.progressBar = skillProgressBarWidget;
+        return widgets;
+    }
+
     MyGUI::Widget* StatsWindow::addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
     {
         MyGUI::TextBox* skillNameWidget;
@@ -430,7 +477,7 @@ namespace MWGui
         return skillNameWidget;
     }
 
-    void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+    void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2, MyGUI::IntCoord &coord3)
     {
         // Add a line separator if there are items above
         if (!mSkillWidgets.empty())
@@ -456,14 +503,11 @@ namespace MWGui
             const ESM::Attribute* attr =
                 esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
-            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> textWidgets = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
-                "", "normal", coord1, coord2);
-            SkillWidgets widgets;
-            widgets.name = textWidgets.first;
-            widgets.value = textWidgets.second;
+            ProgressValueWidgets widgets = addProgressValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
+                "", "normal", coord1, coord2, coord3);
             mSkillWidgetMap[skillId] = widgets;
 
-            for (int i=0; i<2; ++i)
+            for (int i=0; i<4; ++i)
             {
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ToolTipType", "Layout");
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ToolTipLayout", "SkillToolTip");
@@ -489,17 +533,22 @@ namespace MWGui
         mSkillWidgets.clear();
 
         const int valueSize = 40;
-        MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
+        const int progressSize = 70;
+        MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize + progressSize) - 16, 18);
         MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
+        MyGUI::IntCoord coord3(coord2.left + coord2.width + 5, coord2.top, progressSize - 5, coord2.height);
 
         if (!mMajorSkills.empty())
-            addSkills(mMajorSkills, "sSkillClassMajor", "Major Skills", coord1, coord2);
+            addSkills(mMajorSkills, "sSkillClassMajor", "Major Skills", coord1, coord2, coord3);
 
         if (!mMinorSkills.empty())
-            addSkills(mMinorSkills, "sSkillClassMinor", "Minor Skills", coord1, coord2);
+            addSkills(mMinorSkills, "sSkillClassMinor", "Minor Skills", coord1, coord2, coord3);
 
         if (!mMiscSkills.empty())
-            addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
+            addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2, coord3);
+
+        coord1.width += progressSize;
+        coord2.left += progressSize;
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
