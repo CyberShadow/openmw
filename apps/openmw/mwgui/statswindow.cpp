@@ -321,15 +321,18 @@ namespace MWGui
 
         // level progress
         MyGUI::Widget* levelWidget;
+        int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
         for (int i=0; i<2; ++i)
         {
-            int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
             levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelProgressText", MyGUI::utility::toString(PCstats.getLevelProgress()) + "/"
                                        + MyGUI::utility::toString(max));
         }
+        setText("LevelText",
+            "[" + MyGUI::utility::toString(PCstats.getLevelProgress()) + "/" + MyGUI::utility::toString(max) + "] " +
+            MyGUI::utility::toString(PCstats.getLevel()));
 
         setFactions(PCstats.getFactionRanks());
         setExpelled(PCstats.getExpelled ());
